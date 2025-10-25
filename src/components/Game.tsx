@@ -2,13 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSound } from '@/hooks/useMusic';
 
 interface GameObject {
   x: number;
   y: number;
   width: number;
   height: number;
-  type: 'spike' | 'block' | 'platform';
+  type: 'spike' | 'block' | 'platform' | 'speed_boost';
 }
 
 interface Level {
@@ -27,7 +30,7 @@ const LEVELS: Level[] = [
     name: 'Stereo Madness',
     difficulty: 'Easy',
     color: '#8B5CF6',
-    speed: 3,
+    speed: 5,
     duration: 22,
     objects: [
       { x: 300, y: 350, width: 40, height: 40, type: 'spike' },
@@ -47,7 +50,7 @@ const LEVELS: Level[] = [
     name: 'Back on Track',
     difficulty: 'Medium',
     color: '#0EA5E9',
-    speed: 4,
+    speed: 6,
     duration: 23,
     objects: [
       { x: 250, y: 350, width: 40, height: 40, type: 'spike' },
@@ -69,7 +72,7 @@ const LEVELS: Level[] = [
     name: 'Polargeist',
     difficulty: 'Hard',
     color: '#F97316',
-    speed: 5,
+    speed: 7,
     duration: 24,
     objects: [
       { x: 200, y: 350, width: 40, height: 40, type: 'spike' },
@@ -79,6 +82,7 @@ const LEVELS: Level[] = [
       { x: 800, y: 200, width: 120, height: 50, type: 'platform' },
       { x: 1000, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 1100, y: 350, width: 40, height: 40, type: 'spike' },
+      { x: 1200, y: 300, width: 50, height: 60, type: 'speed_boost' },
       { x: 1250, y: 280, width: 80, height: 50, type: 'block' },
       { x: 1450, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 1600, y: 230, width: 100, height: 50, type: 'platform' },
@@ -93,12 +97,13 @@ const LEVELS: Level[] = [
     name: 'Dry Out',
     difficulty: 'Expert',
     color: '#D946EF',
-    speed: 6,
+    speed: 8,
     duration: 25,
     objects: [
       { x: 180, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 280, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 430, y: 240, width: 100, height: 50, type: 'platform' },
+      { x: 600, y: 280, width: 50, height: 60, type: 'speed_boost' },
       { x: 630, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 730, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 880, y: 180, width: 120, height: 50, type: 'platform' },
@@ -107,6 +112,7 @@ const LEVELS: Level[] = [
       { x: 1330, y: 270, width: 80, height: 50, type: 'block' },
       { x: 1530, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 1680, y: 210, width: 100, height: 50, type: 'platform' },
+      { x: 1850, y: 260, width: 50, height: 60, type: 'speed_boost' },
       { x: 1880, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 1980, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 2180, y: 170, width: 120, height: 50, type: 'platform' },
@@ -119,23 +125,26 @@ const LEVELS: Level[] = [
     name: 'Hexagon Force',
     difficulty: 'Extreme',
     color: '#EF4444',
-    speed: 7,
+    speed: 9,
     duration: 26,
     objects: [
       { x: 150, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 250, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 350, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 500, y: 230, width: 100, height: 50, type: 'platform' },
+      { x: 670, y: 270, width: 50, height: 60, type: 'speed_boost' },
       { x: 700, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 800, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 950, y: 160, width: 120, height: 50, type: 'platform' },
       { x: 1150, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 1250, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 1400, y: 260, width: 80, height: 50, type: 'block' },
+      { x: 1570, y: 280, width: 50, height: 60, type: 'speed_boost' },
       { x: 1600, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 1750, y: 190, width: 100, height: 50, type: 'platform' },
       { x: 1950, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 2050, y: 350, width: 40, height: 40, type: 'spike' },
+      { x: 2220, y: 240, width: 50, height: 60, type: 'speed_boost' },
       { x: 2250, y: 150, width: 120, height: 50, type: 'platform' },
       { x: 2450, y: 350, width: 40, height: 40, type: 'spike' },
       { x: 2550, y: 350, width: 40, height: 40, type: 'spike' },
@@ -150,6 +159,9 @@ interface GameProps {
 }
 
 export default function Game({ onBack, levelId }: GameProps) {
+  const { t } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
+  const { jumpSound, deathSound, victorySound } = useSound();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameOver, setGameOver] = useState(false);
@@ -180,6 +192,8 @@ export default function Game({ onBack, levelId }: GameProps) {
     let currentVelocityY = velocityY;
     let currentPlayerY = playerY;
     let currentCameraX = cameraX;
+    const currentSpeedMultiplier = speedMultiplier;
+    const currentCollectedBoosts = [...collectedBoosts];
     let isOnGround = false;
 
     const gameLoop = () => {
@@ -189,7 +203,7 @@ export default function Game({ onBack, levelId }: GameProps) {
       ctx.fillStyle = '#2A2F3C';
       ctx.fillRect(0, GROUND_Y + PLAYER_SIZE, canvas.width, canvas.height);
 
-      currentCameraX += level.speed;
+      currentCameraX += level.speed * currentSpeedMultiplier;
       setCameraX(currentCameraX);
 
       const progressPercent = Math.min((currentCameraX / (level.objects[level.objects.length - 1].x + 500)) * 100, 100);
@@ -205,7 +219,8 @@ export default function Game({ onBack, levelId }: GameProps) {
       currentPlayerY += currentVelocityY;
 
       isOnGround = false;
-      for (const obj of level.objects) {
+      for (let i = 0; i < level.objects.length; i++) {
+        const obj = level.objects[i];
         const objScreenX = obj.x - currentCameraX;
         
         if (
@@ -219,6 +234,13 @@ export default function Game({ onBack, levelId }: GameProps) {
             setIsPlaying(false);
             setAttempts(prev => prev + 1);
             return;
+          }
+          
+          if (obj.type === 'speed_boost' && !currentCollectedBoosts.includes(i)) {
+            currentSpeedMultiplier = Math.min(currentSpeedMultiplier + 0.5, 2.5);
+            currentCollectedBoosts.push(i);
+            setSpeedMultiplier(currentSpeedMultiplier);
+            setCollectedBoosts(currentCollectedBoosts);
           }
           
           if (obj.type === 'platform' || obj.type === 'block') {
@@ -246,7 +268,7 @@ export default function Game({ onBack, levelId }: GameProps) {
       setVelocityY(currentVelocityY);
       setIsJumping(!isOnGround);
 
-      level.objects.forEach(obj => {
+      level.objects.forEach((obj, index) => {
         const objScreenX = obj.x - currentCameraX;
         
         if (objScreenX > -obj.width && objScreenX < canvas.width) {
@@ -263,6 +285,25 @@ export default function Game({ onBack, levelId }: GameProps) {
             ctx.shadowColor = '#EF4444';
             ctx.fill();
             ctx.shadowBlur = 0;
+          } else if (obj.type === 'speed_boost') {
+            const isCollected = currentCollectedBoosts.includes(index);
+            const boostColor = isCollected ? '#4B5563' : '#10B981';
+            
+            ctx.fillStyle = boostColor;
+            ctx.fillRect(objScreenX, obj.y, obj.width, obj.height);
+            
+            if (!isCollected) {
+              ctx.shadowBlur = 20;
+              ctx.shadowColor = '#10B981';
+              ctx.fillRect(objScreenX, obj.y, obj.width, obj.height);
+              ctx.shadowBlur = 0;
+              
+              ctx.fillStyle = '#FFFFFF';
+              ctx.font = 'bold 30px Arial';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('»»', objScreenX + obj.width / 2, obj.y + obj.height / 2);
+            }
           } else if (obj.type === 'platform') {
             ctx.fillStyle = level.color;
             ctx.fillRect(objScreenX, obj.y, obj.width, obj.height);
@@ -302,7 +343,7 @@ export default function Game({ onBack, levelId }: GameProps) {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isPlaying, gameOver, victory, level, velocityY, playerY, cameraX]);
+  }, [isPlaying, gameOver, victory, level, velocityY, playerY, cameraX, speedMultiplier, collectedBoosts]);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -334,6 +375,8 @@ export default function Game({ onBack, levelId }: GameProps) {
     setVelocityY(0);
     setCameraX(0);
     setProgress(0);
+    setSpeedMultiplier(1);
+    setCollectedBoosts([]);
   };
 
   return (
@@ -344,9 +387,13 @@ export default function Game({ onBack, levelId }: GameProps) {
             <Icon name="ArrowLeft" size={20} />
             Назад
           </Button>
-          <div className="text-center">
+          <div className="text-center flex-1">
             <h2 className="text-2xl font-bold" style={{ color: level.color }}>{level.name}</h2>
             <p className="text-sm text-muted-foreground">{level.difficulty}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Скорость</p>
+            <p className="text-xl font-bold text-green-400">{speedMultiplier.toFixed(1)}x</p>
           </div>
           <div className="text-right">
             <p className="text-sm text-muted-foreground">Попыток</p>
