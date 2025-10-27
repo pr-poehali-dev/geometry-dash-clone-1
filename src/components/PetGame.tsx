@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import MiniGames from '@/components/MiniGames';
 
 interface PetStats {
   hunger: number;
@@ -38,6 +39,7 @@ const PetGame = () => {
     level: 1,
   });
   const [showShop, setShowShop] = useState(false);
+  const [showMiniGames, setShowMiniGames] = useState(false);
   const [petMood, setPetMood] = useState<'happy' | 'neutral' | 'sad'>('neutral');
   const [activity, setActivity] = useState<string>('');
   const [petAnimation, setPetAnimation] = useState('');
@@ -237,6 +239,21 @@ const PetGame = () => {
     return 'bg-red-500';
   };
 
+  const handleGameWin = (coins: number) => {
+    setStats(prev => ({ ...prev, coins: prev.coins + coins }));
+    setPetAnimation('animate-bounce');
+    setActivity(`+${coins} монет! 🎉`);
+    toast({
+      title: '🎉 Победа!',
+      description: `Получено ${coins} монет`,
+    });
+    setTimeout(() => {
+      setPetAnimation('');
+      setActivity('');
+      setShowMiniGames(false);
+    }, 2000);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-purple-400 via-pink-300 to-blue-300 overflow-hidden">
       <div className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
@@ -347,7 +364,24 @@ const PetGame = () => {
         </div>
       )}
 
+      {showMiniGames && (
+        <MiniGames 
+          onClose={() => setShowMiniGames(false)} 
+          onWin={handleGameWin}
+        />
+      )}
+
       <div className="bg-white/95 backdrop-blur-sm p-4 shadow-2xl rounded-t-3xl">
+        <div className="flex gap-2 mb-3 max-w-2xl mx-auto">
+          <Button 
+            onClick={() => setShowMiniGames(true)}
+            className="flex-1 h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+          >
+            <Icon name="Trophy" size={24} />
+            <span className="text-sm font-bold">Мини-игры</span>
+          </Button>
+        </div>
+
         <div className="grid grid-cols-6 gap-2 max-w-2xl mx-auto">
           <Button 
             onClick={feed}
