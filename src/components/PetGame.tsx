@@ -29,20 +29,48 @@ const SHOP_ITEMS: ShopItem[] = [
   { id: 'bed', name: 'Лежанка', icon: '🛏️', cost: 30, hungerBoost: 0, happinessBoost: 15, energyBoost: 50 },
 ];
 
+const SAVE_KEY = 'myavl_pet_save';
+
+const loadSave = (): PetStats | null => {
+  try {
+    const saved = localStorage.getItem(SAVE_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      return data;
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки сохранения:', error);
+  }
+  return null;
+};
+
 const PetGame = () => {
   const { toast } = useToast();
-  const [stats, setStats] = useState<PetStats>({
-    hunger: 80,
-    happiness: 70,
-    energy: 60,
-    coins: 50,
-    level: 1,
+  const [stats, setStats] = useState<PetStats>(() => {
+    const saved = loadSave();
+    return saved || {
+      hunger: 80,
+      happiness: 70,
+      energy: 60,
+      coins: 50,
+      level: 1,
+    };
   });
   const [showShop, setShowShop] = useState(false);
   const [showMiniGames, setShowMiniGames] = useState(false);
   const [petMood, setPetMood] = useState<'happy' | 'neutral' | 'sad'>('neutral');
   const [activity, setActivity] = useState<string>('');
   const [petAnimation, setPetAnimation] = useState('');
+  const [lastSave, setLastSave] = useState<Date>(new Date());
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(stats));
+      setLastSave(new Date());
+    } catch (error) {
+      console.error('Ошибка сохранения:', error);
+    }
+  }, [stats]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -239,6 +267,22 @@ const PetGame = () => {
     return 'bg-red-500';
   };
 
+  const resetProgress = () => {
+    const defaultStats = {
+      hunger: 80,
+      happiness: 70,
+      energy: 60,
+      coins: 50,
+      level: 1,
+    };
+    setStats(defaultStats);
+    localStorage.setItem(SAVE_KEY, JSON.stringify(defaultStats));
+    toast({
+      title: '🔄 Прогресс сброшен',
+      description: 'Игра начата заново!',
+    });
+  };
+
   const handleGameWin = (coins: number) => {
     setStats(prev => ({ ...prev, coins: prev.coins + coins }));
     setPetAnimation('animate-bounce');
@@ -267,11 +311,20 @@ const PetGame = () => {
           </div>
         </div>
         
-        <div className="flex gap-4">
+        <div className="flex gap-2 items-center">
           <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
             <Icon name="Coins" size={20} className="text-yellow-300" />
             <span className="font-bold text-lg">{stats.coins}</span>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={resetProgress}
+            className="text-white hover:bg-white/20 rounded-full"
+            title="Сбросить прогресс"
+          >
+            <Icon name="RotateCcw" size={20} />
+          </Button>
         </div>
       </div>
 
