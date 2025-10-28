@@ -299,38 +299,38 @@ const PetGame = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-400 via-pink-300 to-blue-300 overflow-hidden">
-      <div className="flex justify-between items-center p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-400 via-pink-300 to-blue-300 overflow-hidden touch-manipulation">
+      <div className="flex justify-between items-center p-3 sm:p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-2xl">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center text-xl sm:text-2xl">
             {getMoodEmoji()}
           </div>
           <div>
-            <h1 className="font-bold text-lg">Мявл</h1>
-            <p className="text-xs opacity-90">Уровень {stats.level}</p>
+            <h1 className="font-bold text-base sm:text-lg">Мявл</h1>
+            <p className="text-xs opacity-90">Ур. {stats.level}</p>
           </div>
         </div>
         
-        <div className="flex gap-2 items-center">
-          <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
-            <Icon name="Coins" size={20} className="text-yellow-300" />
-            <span className="font-bold text-lg">{stats.coins}</span>
+        <div className="flex gap-1 sm:gap-2 items-center">
+          <div className="bg-white/20 backdrop-blur-sm rounded-full px-2 sm:px-4 py-1 sm:py-2 flex items-center gap-1 sm:gap-2">
+            <Icon name="Coins" size={18} className="text-yellow-300" />
+            <span className="font-bold text-base sm:text-lg">{stats.coins}</span>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={resetProgress}
-            className="text-white hover:bg-white/20 rounded-full"
+            className="text-white hover:bg-white/20 rounded-full h-8 w-8 sm:h-10 sm:w-10"
             title="Сбросить прогресс"
           >
-            <Icon name="RotateCcw" size={20} />
+            <Icon name="RotateCcw" size={18} />
           </Button>
         </div>
       </div>
 
-      <div className="absolute top-20 left-4 right-4 flex gap-2 z-10">
-        <div className="flex-1 bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 flex items-center gap-2 shadow-lg">
-          <Icon name="UtensilsCrossed" size={16} className="text-orange-500" />
+      <div className="absolute top-14 sm:top-20 left-2 right-2 sm:left-4 sm:right-4 flex gap-1 sm:gap-2 z-10">
+        <div className="flex-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1.5 sm:px-3 sm:py-2 flex items-center gap-1 sm:gap-2 shadow-lg">
+          <Icon name="UtensilsCrossed" size={14} className="text-orange-500" />
           <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
             <div 
               className={`h-full transition-all ${getStatColor(stats.hunger)}`}
@@ -339,8 +339,8 @@ const PetGame = () => {
           </div>
         </div>
 
-        <div className="flex-1 bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 flex items-center gap-2 shadow-lg">
-          <Icon name="Heart" size={16} className="text-pink-500" />
+        <div className="flex-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1.5 sm:px-3 sm:py-2 flex items-center gap-1 sm:gap-2 shadow-lg">
+          <Icon name="Heart" size={14} className="text-pink-500" />
           <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
             <div 
               className={`h-full transition-all ${getStatColor(stats.happiness)}`}
@@ -349,8 +349,8 @@ const PetGame = () => {
           </div>
         </div>
 
-        <div className="flex-1 bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 flex items-center gap-2 shadow-lg">
-          <Icon name="Zap" size={16} className="text-yellow-500" />
+        <div className="flex-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1.5 sm:px-3 sm:py-2 flex items-center gap-1 sm:gap-2 shadow-lg">
+          <Icon name="Zap" size={14} className="text-yellow-500" />
           <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
             <div 
               className={`h-full transition-all ${getStatColor(stats.energy)}`}
@@ -360,7 +360,7 @@ const PetGame = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center relative pt-20">
+      <div className="flex-1 flex items-center justify-center relative pt-16 sm:pt-20">
         {activity && (
           <div className="absolute top-8 bg-white/90 backdrop-blur-sm rounded-full px-6 py-3 text-lg font-bold shadow-lg animate-bounce-in z-20">
             {activity}
@@ -371,7 +371,7 @@ const PetGame = () => {
           <img 
             src="https://cdn.poehali.dev/files/910f5975-a30d-409e-844f-f83559059fa0.jpg" 
             alt="Мявл"
-            className="w-80 h-80 object-cover rounded-full border-8 border-white shadow-2xl cursor-pointer hover:scale-105 transition-transform"
+            className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-cover rounded-full border-4 sm:border-8 border-white shadow-2xl active:scale-95 transition-transform"
             onClick={() => {
               setPetAnimation('animate-bounce');
               setTimeout(() => setPetAnimation(''), 500);
@@ -382,30 +382,30 @@ const PetGame = () => {
       </div>
 
       {showShop && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-30 p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-purple-600">🛒 Магазин</h2>
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-30 p-3 sm:p-4">
+          <div className="bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-purple-600">🛒 Магазин</h2>
               <Button 
                 variant="ghost" 
                 size="icon"
                 onClick={() => setShowShop(false)}
-                className="rounded-full"
+                className="rounded-full h-9 w-9 sm:h-10 sm:w-10"
               >
-                <Icon name="X" size={24} />
+                <Icon name="X" size={22} />
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {SHOP_ITEMS.map(item => (
                 <Button
                   key={item.id}
                   onClick={() => buyItem(item)}
                   variant="outline"
-                  className="h-auto flex-col p-4 rounded-2xl hover:bg-purple-50 hover:scale-105 transition-transform"
+                  className="h-auto flex-col p-3 sm:p-4 rounded-2xl active:bg-purple-50 active:scale-95 transition-transform"
                   disabled={stats.coins < item.cost}
                 >
-                  <div className="text-5xl mb-2">{item.icon}</div>
-                  <div className="font-bold text-sm">{item.name}</div>
+                  <div className="text-4xl sm:text-5xl mb-1 sm:mb-2">{item.icon}</div>
+                  <div className="font-bold text-xs sm:text-sm">{item.name}</div>
                   <div className="text-xs text-yellow-600 flex items-center gap-1 font-bold">
                     <Icon name="Coins" size={14} />
                     {item.cost}
@@ -424,64 +424,64 @@ const PetGame = () => {
         />
       )}
 
-      <div className="bg-white/95 backdrop-blur-sm p-4 shadow-2xl rounded-t-3xl">
-        <div className="flex gap-2 mb-3 max-w-2xl mx-auto">
+      <div className="bg-white/95 backdrop-blur-sm p-2 sm:p-4 shadow-2xl rounded-t-3xl safe-area-bottom">
+        <div className="flex gap-2 mb-2 sm:mb-3 max-w-2xl mx-auto">
           <Button 
             onClick={() => setShowMiniGames(true)}
-            className="flex-1 h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+            className="flex-1 h-12 sm:h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 active:scale-95 shadow-lg transition-transform flex items-center justify-center gap-2 text-white"
           >
-            <Icon name="Trophy" size={24} />
-            <span className="text-sm font-bold">Мини-игры</span>
+            <Icon name="Trophy" size={20} />
+            <span className="text-xs sm:text-sm font-bold">Мини-игры</span>
           </Button>
         </div>
 
-        <div className="grid grid-cols-6 gap-2 max-w-2xl mx-auto">
+        <div className="grid grid-cols-6 gap-1.5 sm:gap-2 max-w-2xl mx-auto">
           <Button 
             onClick={feed}
-            className="flex flex-col gap-1 h-20 rounded-2xl bg-gradient-to-b from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 shadow-lg hover:scale-105 transition-transform"
+            className="flex flex-col gap-0.5 sm:gap-1 h-16 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-b from-orange-400 to-orange-600 active:scale-95 shadow-lg transition-transform text-white"
           >
-            <Icon name="UtensilsCrossed" size={28} />
-            <span className="text-xs font-bold">Еда</span>
+            <Icon name="UtensilsCrossed" size={24} />
+            <span className="text-[10px] sm:text-xs font-bold">Еда</span>
           </Button>
 
           <Button 
             onClick={play}
-            className="flex flex-col gap-1 h-20 rounded-2xl bg-gradient-to-b from-pink-400 to-pink-600 hover:from-pink-500 hover:to-pink-700 shadow-lg hover:scale-105 transition-transform"
+            className="flex flex-col gap-0.5 sm:gap-1 h-16 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-b from-pink-400 to-pink-600 active:scale-95 shadow-lg transition-transform text-white"
           >
-            <Icon name="Gamepad2" size={28} />
-            <span className="text-xs font-bold">Игра</span>
+            <Icon name="Gamepad2" size={24} />
+            <span className="text-[10px] sm:text-xs font-bold">Игра</span>
           </Button>
 
           <Button 
             onClick={sleep}
-            className="flex flex-col gap-1 h-20 rounded-2xl bg-gradient-to-b from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 shadow-lg hover:scale-105 transition-transform"
+            className="flex flex-col gap-0.5 sm:gap-1 h-16 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-b from-blue-400 to-blue-600 active:scale-95 shadow-lg transition-transform text-white"
           >
-            <Icon name="Moon" size={28} />
-            <span className="text-xs font-bold">Сон</span>
+            <Icon name="Moon" size={24} />
+            <span className="text-[10px] sm:text-xs font-bold">Сон</span>
           </Button>
 
           <Button 
             onClick={walk}
-            className="flex flex-col gap-1 h-20 rounded-2xl bg-gradient-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 shadow-lg hover:scale-105 transition-transform"
+            className="flex flex-col gap-0.5 sm:gap-1 h-16 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-b from-green-400 to-green-600 active:scale-95 shadow-lg transition-transform text-white"
           >
-            <Icon name="Trees" size={28} />
-            <span className="text-xs font-bold">Прогулка</span>
+            <Icon name="Trees" size={24} />
+            <span className="text-[10px] sm:text-xs font-bold leading-tight">Прогул<wbr/>ка</span>
           </Button>
 
           <Button 
             onClick={bathroom}
-            className="flex flex-col gap-1 h-20 rounded-2xl bg-gradient-to-b from-cyan-400 to-cyan-600 hover:from-cyan-500 hover:to-cyan-700 shadow-lg hover:scale-105 transition-transform"
+            className="flex flex-col gap-0.5 sm:gap-1 h-16 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-b from-cyan-400 to-cyan-600 active:scale-95 shadow-lg transition-transform text-white"
           >
-            <Icon name="Droplet" size={28} />
-            <span className="text-xs font-bold">Туалет</span>
+            <Icon name="Droplet" size={24} />
+            <span className="text-[10px] sm:text-xs font-bold">Туалет</span>
           </Button>
 
           <Button 
             onClick={() => setShowShop(true)}
-            className="flex flex-col gap-1 h-20 rounded-2xl bg-gradient-to-b from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 shadow-lg hover:scale-105 transition-transform"
+            className="flex flex-col gap-0.5 sm:gap-1 h-16 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-b from-yellow-400 to-yellow-600 active:scale-95 shadow-lg transition-transform text-white"
           >
-            <Icon name="ShoppingCart" size={28} />
-            <span className="text-xs font-bold">Магазин</span>
+            <Icon name="ShoppingCart" size={24} />
+            <span className="text-[10px] sm:text-xs font-bold leading-tight">Мага<wbr/>зин</span>
           </Button>
         </div>
       </div>
