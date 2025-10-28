@@ -10,6 +10,16 @@ interface PetStats {
   energy: number;
   coins: number;
   level: number;
+  costume?: string;
+  ownedCostumes?: string[];
+}
+
+interface Costume {
+  id: string;
+  name: string;
+  icon: string;
+  cost: number;
+  image: string;
 }
 
 interface ShopItem {
@@ -28,6 +38,24 @@ const SHOP_ITEMS: ShopItem[] = [
   { id: 'toy', name: 'Игрушка', icon: '🎾', cost: 15, hungerBoost: 0, happinessBoost: 40, energyBoost: -10 },
   { id: 'bed', name: 'Лежанка', icon: '🛏️', cost: 30, hungerBoost: 0, happinessBoost: 15, energyBoost: 50 },
 ];
+
+const COSTUMES: Costume[] = [
+  { id: 'default', name: 'Обычная', icon: '🐱', cost: 0, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
+  { id: 'wizard', name: 'Волшебница', icon: '🧙', cost: 100, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
+  { id: 'pirate', name: 'Пират', icon: '🏴‍☠️', cost: 150, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
+  { id: 'princess', name: 'Принцесса', icon: '👑', cost: 200, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
+];
+
+type Location = 'home' | 'kitchen' | 'bedroom' | 'bathroom' | 'park' | 'play';
+
+const LOCATION_BACKGROUNDS: Record<Location, string> = {
+  home: 'bg-gradient-to-br from-purple-400 via-pink-300 to-blue-300',
+  kitchen: 'bg-gradient-to-br from-orange-300 via-yellow-200 to-red-300',
+  bedroom: 'bg-gradient-to-br from-indigo-400 via-purple-300 to-blue-400',
+  bathroom: 'bg-gradient-to-br from-cyan-300 via-blue-200 to-teal-300',
+  park: 'bg-gradient-to-br from-green-400 via-emerald-300 to-lime-300',
+  play: 'bg-gradient-to-br from-pink-400 via-rose-300 to-fuchsia-300',
+};
 
 const SAVE_KEY = 'myavl_pet_save';
 
@@ -54,14 +82,18 @@ const PetGame = () => {
       energy: 60,
       coins: 50,
       level: 1,
+      costume: 'default',
+      ownedCostumes: ['default'],
     };
   });
   const [showShop, setShowShop] = useState(false);
+  const [showCostumes, setShowCostumes] = useState(false);
   const [showMiniGames, setShowMiniGames] = useState(false);
   const [petMood, setPetMood] = useState<'happy' | 'neutral' | 'sad'>('neutral');
   const [activity, setActivity] = useState<string>('');
   const [petAnimation, setPetAnimation] = useState('');
   const [lastSave, setLastSave] = useState<Date>(new Date());
+  const [location, setLocation] = useState<Location>('home');
 
   useEffect(() => {
     try {
@@ -121,6 +153,44 @@ const PetGame = () => {
     setShowShop(false);
   };
 
+  const buyCostume = (costume: Costume) => {
+    if (stats.ownedCostumes?.includes(costume.id)) {
+      setStats(prev => ({ ...prev, costume: costume.id }));
+      toast({
+        title: `${costume.icon} ${costume.name}`,
+        description: 'Костюм надет!',
+      });
+      setShowCostumes(false);
+      return;
+    }
+
+    if (stats.coins < costume.cost) {
+      toast({
+        title: '💰 Недостаточно монет!',
+        description: `Нужно ${costume.cost} монет`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setStats(prev => ({
+      ...prev,
+      coins: prev.coins - costume.cost,
+      costume: costume.id,
+      ownedCostumes: [...(prev.ownedCostumes || []), costume.id],
+    }));
+
+    setPetAnimation('animate-spin');
+    setTimeout(() => setPetAnimation(''), 1000);
+
+    toast({
+      title: `${costume.icon} ${costume.name}`,
+      description: 'Костюм куплен и надет!',
+    });
+
+    setShowCostumes(false);
+  };
+
   const feed = () => {
     if (stats.coins < 10) {
       toast({
@@ -131,6 +201,7 @@ const PetGame = () => {
       return;
     }
 
+    setLocation('kitchen');
     setStats(prev => ({
       ...prev,
       hunger: Math.min(100, prev.hunger + 30),
@@ -143,6 +214,7 @@ const PetGame = () => {
     setTimeout(() => {
       setPetAnimation('');
       setActivity('');
+      setLocation('home');
     }, 2000);
 
     toast({
@@ -161,6 +233,7 @@ const PetGame = () => {
       return;
     }
 
+    setLocation('park');
     setStats(prev => ({
       ...prev,
       happiness: Math.min(100, prev.happiness + 25),
@@ -174,6 +247,7 @@ const PetGame = () => {
     setTimeout(() => {
       setPetAnimation('');
       setActivity('');
+      setLocation('home');
     }, 3000);
 
     toast({
@@ -192,6 +266,7 @@ const PetGame = () => {
       return;
     }
 
+    setLocation('play');
     setStats(prev => ({
       ...prev,
       happiness: Math.min(100, prev.happiness + 30),
@@ -206,6 +281,7 @@ const PetGame = () => {
     setTimeout(() => {
       setPetAnimation('');
       setActivity('');
+      setLocation('home');
     }, 1500);
 
     toast({
@@ -215,6 +291,7 @@ const PetGame = () => {
   };
 
   const sleep = () => {
+    setLocation('bedroom');
     setStats(prev => ({
       ...prev,
       energy: Math.min(100, prev.energy + 40),
@@ -227,6 +304,7 @@ const PetGame = () => {
     setTimeout(() => {
       setPetAnimation('');
       setActivity('');
+      setLocation('home');
     }, 4000);
 
     toast({
@@ -236,6 +314,7 @@ const PetGame = () => {
   };
 
   const bathroom = () => {
+    setLocation('bathroom');
     setStats(prev => ({
       ...prev,
       happiness: Math.min(100, prev.happiness + 15),
@@ -247,6 +326,7 @@ const PetGame = () => {
     setTimeout(() => {
       setPetAnimation('');
       setActivity('');
+      setLocation('home');
     }, 2000);
 
     toast({
@@ -274,6 +354,8 @@ const PetGame = () => {
       energy: 60,
       coins: 50,
       level: 1,
+      costume: 'default',
+      ownedCostumes: ['default'],
     };
     setStats(defaultStats);
     localStorage.setItem(SAVE_KEY, JSON.stringify(defaultStats));
@@ -284,9 +366,15 @@ const PetGame = () => {
   };
 
   const handleGameWin = (coins: number) => {
-    setStats(prev => ({ ...prev, coins: prev.coins + coins }));
+    setStats(prev => ({
+      ...prev,
+      coins: prev.coins + coins,
+      happiness: Math.min(100, prev.happiness + 10),
+    }));
+    
     setPetAnimation('animate-bounce');
-    setActivity(`+${coins} монет! 🎉`);
+    setActivity('Победа! 🎉');
+    
     toast({
       title: '🎉 Победа!',
       description: `Получено ${coins} монет`,
@@ -298,8 +386,10 @@ const PetGame = () => {
     }, 2000);
   };
 
+  const currentCostume = COSTUMES.find(c => c.id === stats.costume) || COSTUMES[0];
+
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-purple-400 via-pink-300 to-blue-300 overflow-hidden touch-manipulation">
+    <div className={`h-screen flex flex-col ${LOCATION_BACKGROUNDS[location]} overflow-hidden touch-manipulation transition-colors duration-700`}>
       <div className="flex justify-between items-center p-3 sm:p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center text-xl sm:text-2xl">
@@ -369,7 +459,7 @@ const PetGame = () => {
         
         <div className={`relative ${petAnimation}`}>
           <img 
-            src="https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png" 
+            src={currentCostume.image} 
             alt="Мявл"
             className="w-48 h-56 sm:w-64 sm:h-72 md:w-80 md:h-96 object-contain drop-shadow-2xl active:scale-95 transition-transform"
             onClick={() => {
@@ -417,6 +507,57 @@ const PetGame = () => {
         </div>
       )}
 
+      {showCostumes && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-30 p-3 sm:p-4">
+          <div className="bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-purple-600">👗 Костюмы</h2>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowCostumes(false)}
+                className="rounded-full h-9 w-9 sm:h-10 sm:w-10"
+              >
+                <Icon name="X" size={22} />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              {COSTUMES.map(costume => {
+                const owned = stats.ownedCostumes?.includes(costume.id);
+                const equipped = stats.costume === costume.id;
+                
+                return (
+                  <Button
+                    key={costume.id}
+                    onClick={() => buyCostume(costume)}
+                    variant={equipped ? "default" : "outline"}
+                    className="h-auto flex-col p-3 sm:p-4 rounded-2xl active:bg-purple-50 active:scale-95 transition-transform relative"
+                    disabled={!owned && stats.coins < costume.cost}
+                  >
+                    {equipped && (
+                      <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                        ✓
+                      </div>
+                    )}
+                    <div className="text-4xl sm:text-5xl mb-1 sm:mb-2">{costume.icon}</div>
+                    <div className="font-bold text-xs sm:text-sm">{costume.name}</div>
+                    {!owned && (
+                      <div className="text-xs text-yellow-600 flex items-center gap-1 font-bold">
+                        <Icon name="Coins" size={14} />
+                        {costume.cost}
+                      </div>
+                    )}
+                    {owned && !equipped && (
+                      <div className="text-xs text-green-600 font-bold">Надеть</div>
+                    )}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {showMiniGames && (
         <MiniGames 
           onClose={() => setShowMiniGames(false)} 
@@ -432,6 +573,13 @@ const PetGame = () => {
           >
             <Icon name="Trophy" size={20} />
             <span className="text-xs sm:text-sm font-bold">Мини-игры</span>
+          </Button>
+          <Button 
+            onClick={() => setShowCostumes(true)}
+            className="flex-1 h-12 sm:h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 active:scale-95 shadow-lg transition-transform flex items-center justify-center gap-2 text-white"
+          >
+            <Icon name="Shirt" size={20} />
+            <span className="text-xs sm:text-sm font-bold">Костюмы</span>
           </Button>
         </div>
 
