@@ -369,9 +369,9 @@ const PetGame = () => {
         
         <div className={`relative ${petAnimation}`}>
           <img 
-            src="https://cdn.poehali.dev/files/910f5975-a30d-409e-844f-f83559059fa0.jpg" 
+            src="https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png" 
             alt="Мявл"
-            className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-cover rounded-full border-4 sm:border-8 border-white shadow-2xl active:scale-95 transition-transform"
+            className="w-48 h-56 sm:w-64 sm:h-72 md:w-80 md:h-96 object-contain drop-shadow-2xl active:scale-95 transition-transform"
             onClick={() => {
               setPetAnimation('animate-bounce');
               setTimeout(() => setPetAnimation(''), 500);
