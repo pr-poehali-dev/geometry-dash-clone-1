@@ -10,6 +10,7 @@ interface PetStats {
   energy: number;
   coins: number;
   level: number;
+  experience: number;
   costume?: string;
   ownedCostumes?: string[];
 }
@@ -20,6 +21,7 @@ interface Costume {
   icon: string;
   cost: number;
   image: string;
+  requiredLevel: number;
 }
 
 interface ShopItem {
@@ -40,10 +42,12 @@ const SHOP_ITEMS: ShopItem[] = [
 ];
 
 const COSTUMES: Costume[] = [
-  { id: 'default', name: 'Обычная', icon: '🐱', cost: 0, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
-  { id: 'wizard', name: 'Волшебница', icon: '🧙', cost: 100, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
-  { id: 'pirate', name: 'Пират', icon: '🏴‍☠️', cost: 150, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
-  { id: 'princess', name: 'Принцесса', icon: '👑', cost: 200, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
+  { id: 'default', name: 'Обычная', icon: '🐱', cost: 0, requiredLevel: 1, image: 'https://cdn.poehali.dev/files/d8cdc41b-8201-49b9-a4e4-707018bd4f9a.png' },
+  { id: 'wizard', name: 'Волшебница', icon: '🧙', cost: 100, requiredLevel: 3, image: 'https://cdn.poehali.dev/projects/e8518974-a6f2-4129-8808-7604e9cea2ca/files/b83c578a-de84-4de5-87ad-b7049efce955.jpg' },
+  { id: 'pirate', name: 'Пират', icon: '🏴‍☠️', cost: 150, requiredLevel: 5, image: 'https://cdn.poehali.dev/projects/e8518974-a6f2-4129-8808-7604e9cea2ca/files/2a34d6b9-72c4-426e-a39d-3d1653e4362d.jpg' },
+  { id: 'princess', name: 'Принцесса', icon: '👑', cost: 200, requiredLevel: 8, image: 'https://cdn.poehali.dev/projects/e8518974-a6f2-4129-8808-7604e9cea2ca/files/615d1d98-db1c-43d5-9eed-169dd51c788d.jpg' },
+  { id: 'astronaut', name: 'Космонавт', icon: '🚀', cost: 300, requiredLevel: 12, image: 'https://cdn.poehali.dev/projects/e8518974-a6f2-4129-8808-7604e9cea2ca/files/bd036c6d-fe94-4b5e-9bc7-55f7b21729e9.jpg' },
+  { id: 'ninja', name: 'Ниндзя', icon: '🥷', cost: 400, requiredLevel: 15, image: 'https://cdn.poehali.dev/projects/e8518974-a6f2-4129-8808-7604e9cea2ca/files/f6a1b03c-1524-4263-83fe-ce9ce0e98357.jpg' },
 ];
 
 type Location = 'home' | 'kitchen' | 'bedroom' | 'bathroom' | 'park' | 'play';
@@ -82,6 +86,7 @@ const PetGame = () => {
       energy: 60,
       coins: 50,
       level: 1,
+      experience: 0,
       costume: 'default',
       ownedCostumes: ['default'],
     };
@@ -124,6 +129,27 @@ const PetGame = () => {
     else setPetMood('sad');
   }, [stats]);
 
+  const addExperience = (amount: number) => {
+    const expNeeded = stats.level * 100;
+    const newExp = stats.experience + amount;
+    
+    if (newExp >= expNeeded) {
+      const newLevel = stats.level + 1;
+      setStats(prev => ({
+        ...prev,
+        level: newLevel,
+        experience: newExp - expNeeded,
+      }));
+      
+      toast({
+        title: '⭐ Повышение уровня!',
+        description: `Теперь уровень ${newLevel}! Новые костюмы доступны!`,
+      });
+    } else {
+      setStats(prev => ({ ...prev, experience: newExp }));
+    }
+  };
+
   const buyItem = (item: ShopItem) => {
     if (stats.coins < item.cost) {
       toast({
@@ -161,6 +187,15 @@ const PetGame = () => {
         description: 'Костюм надет!',
       });
       setShowCostumes(false);
+      return;
+    }
+
+    if (stats.level < costume.requiredLevel) {
+      toast({
+        title: '🔒 Нужен уровень!',
+        description: `Требуется ${costume.requiredLevel} уровень`,
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -208,6 +243,8 @@ const PetGame = () => {
       happiness: Math.min(100, prev.happiness + 10),
       coins: prev.coins - 10,
     }));
+    
+    addExperience(5);
 
     setPetAnimation('animate-pulse');
     setActivity('Ням-ням! 😋');
@@ -240,6 +277,8 @@ const PetGame = () => {
       energy: Math.max(0, prev.energy - 15),
       coins: prev.coins + 5,
     }));
+    
+    addExperience(10);
 
     setPetAnimation('animate-bounce');
     setActivity('Гуляю! 🌳');
@@ -274,6 +313,8 @@ const PetGame = () => {
       hunger: Math.max(0, prev.hunger - 5),
       coins: prev.coins + 3,
     }));
+    
+    addExperience(8);
 
     setPetAnimation('animate-spin');
     setActivity('Играю! 🎉');
@@ -297,6 +338,8 @@ const PetGame = () => {
       energy: Math.min(100, prev.energy + 40),
       hunger: Math.max(0, prev.hunger - 10),
     }));
+    
+    addExperience(3);
 
     setPetAnimation('animate-pulse');
     setActivity('Сплю... 💤');
@@ -319,6 +362,8 @@ const PetGame = () => {
       ...prev,
       happiness: Math.min(100, prev.happiness + 15),
     }));
+    
+    addExperience(2);
 
     setPetAnimation('animate-bounce');
     setActivity('В туалет! 🚽');
@@ -354,6 +399,7 @@ const PetGame = () => {
       energy: 60,
       coins: 50,
       level: 1,
+      experience: 0,
       costume: 'default',
       ownedCostumes: ['default'],
     };
@@ -371,6 +417,8 @@ const PetGame = () => {
       coins: prev.coins + coins,
       happiness: Math.min(100, prev.happiness + 10),
     }));
+    
+    addExperience(15);
     
     setPetAnimation('animate-bounce');
     setActivity('Победа! 🎉');
@@ -397,7 +445,16 @@ const PetGame = () => {
           </div>
           <div>
             <h1 className="font-bold text-base sm:text-lg">Мявл</h1>
-            <p className="text-xs opacity-90">Ур. {stats.level}</p>
+            <div className="flex items-center gap-1">
+              <p className="text-xs opacity-90">Ур. {stats.level}</p>
+              <div className="w-12 sm:w-16 bg-white/30 rounded-full h-1 overflow-hidden">
+                <div 
+                  className="h-full bg-yellow-300 transition-all"
+                  style={{ width: `${(stats.experience / (stats.level * 100)) * 100}%` }}
+                  title={`${stats.experience}/${stats.level * 100} опыта`}
+                />
+              </div>
+            </div>
           </div>
         </div>
         
@@ -525,6 +582,7 @@ const PetGame = () => {
               {COSTUMES.map(costume => {
                 const owned = stats.ownedCostumes?.includes(costume.id);
                 const equipped = stats.costume === costume.id;
+                const locked = stats.level < costume.requiredLevel;
                 
                 return (
                   <Button
@@ -532,16 +590,24 @@ const PetGame = () => {
                     onClick={() => buyCostume(costume)}
                     variant={equipped ? "default" : "outline"}
                     className="h-auto flex-col p-3 sm:p-4 rounded-2xl active:bg-purple-50 active:scale-95 transition-transform relative"
-                    disabled={!owned && stats.coins < costume.cost}
+                    disabled={(!owned && stats.coins < costume.cost) || locked}
                   >
                     {equipped && (
                       <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
                         ✓
                       </div>
                     )}
+                    {locked && (
+                      <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+                        <div className="text-center">
+                          <Icon name="Lock" size={24} className="mx-auto text-white mb-1" />
+                          <p className="text-white text-xs font-bold">Ур. {costume.requiredLevel}</p>
+                        </div>
+                      </div>
+                    )}
                     <div className="text-4xl sm:text-5xl mb-1 sm:mb-2">{costume.icon}</div>
                     <div className="font-bold text-xs sm:text-sm">{costume.name}</div>
-                    {!owned && (
+                    {!owned && !locked && (
                       <div className="text-xs text-yellow-600 flex items-center gap-1 font-bold">
                         <Icon name="Coins" size={14} />
                         {costume.cost}
