@@ -13,6 +13,8 @@ interface PetStats {
   experience: number;
   costume?: string;
   ownedCostumes?: string[];
+  lastDailyReward?: string;
+  dailyStreak?: number;
 }
 
 interface Costume {
@@ -89,11 +91,13 @@ const PetGame = () => {
       experience: 0,
       costume: 'default',
       ownedCostumes: ['default'],
+      dailyStreak: 0,
     };
   });
   const [showShop, setShowShop] = useState(false);
   const [showCostumes, setShowCostumes] = useState(false);
   const [showMiniGames, setShowMiniGames] = useState(false);
+  const [showDailyReward, setShowDailyReward] = useState(false);
   const [petMood, setPetMood] = useState<'happy' | 'neutral' | 'sad'>('neutral');
   const [activity, setActivity] = useState<string>('');
   const [petAnimation, setPetAnimation] = useState('');
@@ -128,6 +132,19 @@ const PetGame = () => {
     else if (avgStats > 30) setPetMood('neutral');
     else setPetMood('sad');
   }, [stats]);
+
+  useEffect(() => {
+    const checkDailyReward = () => {
+      const today = new Date().toDateString();
+      const lastReward = stats.lastDailyReward;
+      
+      if (!lastReward || lastReward !== today) {
+        setShowDailyReward(true);
+      }
+    };
+    
+    checkDailyReward();
+  }, [stats.lastDailyReward]);
 
   const addExperience = (amount: number) => {
     const expNeeded = stats.level * 100;
@@ -224,6 +241,37 @@ const PetGame = () => {
     });
 
     setShowCostumes(false);
+  };
+
+  const claimDailyReward = () => {
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    let newStreak = 1;
+    if (stats.lastDailyReward === yesterday) {
+      newStreak = (stats.dailyStreak || 0) + 1;
+    }
+    
+    const baseReward = 50;
+    const streakBonus = Math.min(newStreak * 10, 100);
+    const totalCoins = baseReward + streakBonus;
+    const expReward = 20 + (newStreak * 5);
+    
+    setStats(prev => ({
+      ...prev,
+      coins: prev.coins + totalCoins,
+      lastDailyReward: today,
+      dailyStreak: newStreak,
+    }));
+    
+    addExperience(expReward);
+    
+    toast({
+      title: '🎁 Ежедневная награда!',
+      description: `+${totalCoins} монет, +${expReward} опыта (День ${newStreak})`,
+    });
+    
+    setShowDailyReward(false);
   };
 
   const feed = () => {
@@ -560,6 +608,39 @@ const PetGame = () => {
                 </Button>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {showDailyReward && (
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-40 p-4">
+          <div className="bg-gradient-to-br from-yellow-400 via-orange-400 to-pink-500 rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center transform animate-pulse">
+            <div className="text-6xl mb-4">🎁</div>
+            <h2 className="text-3xl font-bold text-white mb-2">Ежедневная награда!</h2>
+            <p className="text-white/90 mb-4">
+              {stats.dailyStreak && stats.dailyStreak > 0 
+                ? `День ${(stats.lastDailyReward === new Date(Date.now() - 86400000).toDateString() ? stats.dailyStreak : 0) + 1} подряд!`
+                : 'Забери свой подарок!'}
+            </p>
+            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 mb-6">
+              <div className="text-white text-lg font-bold mb-2">Награды:</div>
+              <div className="flex gap-4 justify-center text-white">
+                <div>
+                  <Icon name="Coins" size={32} className="mx-auto mb-1" />
+                  <p className="font-bold">{50 + Math.min(((stats.lastDailyReward === new Date(Date.now() - 86400000).toDateString() ? stats.dailyStreak : 0) + 1) * 10, 100)}</p>
+                </div>
+                <div>
+                  <Icon name="Star" size={32} className="mx-auto mb-1" />
+                  <p className="font-bold">{20 + ((stats.lastDailyReward === new Date(Date.now() - 86400000).toDateString() ? stats.dailyStreak : 0) + 1) * 5} опыта</p>
+                </div>
+              </div>
+            </div>
+            <Button 
+              onClick={claimDailyReward}
+              className="w-full h-14 text-lg font-bold bg-white text-orange-600 hover:bg-orange-50 rounded-xl shadow-lg"
+            >
+              Забрать награду! 🎉
+            </Button>
           </div>
         </div>
       )}
